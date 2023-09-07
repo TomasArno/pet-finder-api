@@ -1,8 +1,6 @@
 import { Pet } from "../models";
 import { index } from "../libs/algolia";
 
-import { PetConfig } from "../interfaces";
-
 export class PetController {
   static async getNearbyPets(lat: string, lng: string) {
     try {
@@ -42,20 +40,20 @@ export class PetController {
       console.log(error);
     }
 
-    try {
-      await index.saveObject({
-        objectID: pet.get("id"),
-        name,
-        __geoloc: {
-          lat,
-          lng,
-        },
-      });
+    // try {
+    //   await index.saveObject({
+    //     objectID: pet.get("id"),
+    //     name,
+    //     __geoloc: {
+    //       lat,
+    //       lng,
+    //     },
+    //   });
 
-      return pet.dataValues;
-    } catch (error) {
-      console.log(error);
-    }
+    return pet.dataValues;
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   static async getAllPets() {
@@ -67,13 +65,8 @@ export class PetController {
   }
 
   static async getMyPets(userId: number) {
-    const userPets = Pet.findAll({
+    return Pet.findAll({
       where: { userId },
     });
-    if (userPets) {
-      return userPets;
-    } else {
-      return "user has no pets";
-    }
   }
 }

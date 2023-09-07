@@ -20,10 +20,12 @@ petsRouter.post("/", verifyJwtToken, async (req, res) => {
       message: "All fields are required...",
     });
 
-  req.body.imgURL = "https://picsum.photos/200/300"; // MOCK
-  req.body.userId = req["_user"].id;
+  result.data.imgURL = "https://picsum.photos/200/300"; // MOCK
 
-  const newPet = await PetController.create({ ...result.data });
+  const newPet = await PetController.create({
+    ...result.data,
+    userId: req["_user"].id,
+  });
 
   if (!newPet)
     return res.status(500).json({ error: "Error while creation the pet" });
@@ -31,24 +33,21 @@ petsRouter.post("/", verifyJwtToken, async (req, res) => {
   res.status(201).json(newPet);
 });
 
+petsRouter.get("/", async (req, res) => {
+  res.status(200).json(await PetController.getAllPets());
+});
+
 petsRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
 
-  console.log("entré bien");
+  console.log(req.socket.remoteAddress, "ip");
 
-  console.log(req.socket.remoteAddress, "ip"); // No funciona porque es un monorepo, hacer 2 proyectos distintos
+  const searchedPets = await PetController.getMyPets(parseInt(id));
 
-  const searchedPet = await PetController.getMyPets(parseInt(id));
-
-  if (!searchedPet)
+  if (!searchedPets)
     return res.status(400).json({ message: "Searched pet doesn't exist" });
 
-  res.status(200).json(searchedPet);
-});
-
-petsRouter.get("/", async (req, res) => {
-  console.log("entré mal");
-  res.status(200).json(await PetController.getAllPets());
+  res.status(200).json(searchedPets);
 });
 
 petsRouter.get("/:lat/:lng", async (req, res) => {
