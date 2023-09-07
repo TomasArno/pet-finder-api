@@ -29,7 +29,7 @@ export class PetController {
     }
   }
 
-  static async create(petData: PetConfig) {
+  static async create(petData) {
     const { name, lat, lng } = petData;
 
     let pet;
@@ -66,7 +66,7 @@ export class PetController {
     return Pet.findByPk(id);
   }
 
-  static async getMyPets(userId: string) {
+  static async getMyPets(userId: number) {
     const userPets = Pet.findAll({
       where: { userId },
     });

@@ -1,7 +1,6 @@
 import * as jwt from "jsonwebtoken";
 
 import { Auth } from "../models";
-import { AuthConfig } from "../interfaces";
 
 const SECRET_KEY = process.env.SECRET_KEY_JWT;
 
@@ -10,9 +9,9 @@ export class AuthController {
     const { email, password, userRecord } = authData;
 
     return await Auth.create({
-      userId: userRecord.get("id"),
       email,
       password,
+      userId: userRecord.get("id"),
     });
   }
 
@@ -42,7 +41,7 @@ export class AuthController {
     );
   }
 
-  static async getAuth(authData: AuthConfig) {
+  static async getAuth(authData) {
     const { email, password } = authData;
 
     const auth = await Auth.findOne({

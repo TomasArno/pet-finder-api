@@ -12,7 +12,7 @@ export const app = express();
 
 app.use(
   cors({
-    origin: "https://pet-finder-7msn.onrender.com",
+    origin: ["https://pet-finder-7msn.onrender.com", "http://localhost:1234"],
   })
 );
 app.use(express.json({ limit: "50mb" }));
