@@ -41,6 +41,26 @@ export class AuthController {
     );
   }
 
+  static async changeEmail(
+    credentials: {
+      oldEmail: string;
+      newEmail: string;
+    },
+    userId: string
+  ) {
+    const { newEmail, oldEmail } = credentials;
+
+    return await Auth.update(
+      { email: newEmail },
+      {
+        where: {
+          userId,
+          email: oldEmail,
+        },
+      }
+    );
+  }
+
   static async getAuth(authData) {
     const { email, password } = authData;
 

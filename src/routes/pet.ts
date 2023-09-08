@@ -40,8 +40,6 @@ petsRouter.get("/", async (req, res) => {
 petsRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
 
-  console.log(req.socket.remoteAddress, "ip");
-
   const searchedPets = await PetController.getMyPets(parseInt(id));
 
   if (!searchedPets)
@@ -50,11 +48,11 @@ petsRouter.get("/:id", async (req, res) => {
   res.status(200).json(searchedPets);
 });
 
-petsRouter.get("/:lat/:lng", async (req, res) => {
-  const { lat, lng } = req.params;
+// petsRouter.get("/:lat/:lng", async (req, res) => {
+//   const { lat, lng } = req.params;
 
-  // const nearbyPets = await PetController.getNearbyPets(lat, lng);
-  const nearbyPets = await PetController.getNearbyPetsWithIP();
+//   // const nearbyPets = await PetController.getNearbyPets(lat, lng);
+//   const nearbyPets = await PetController.getNearbyPetsWithIP();
 
-  res.json(nearbyPets);
-});
+//   res.json(nearbyPets);
+// });

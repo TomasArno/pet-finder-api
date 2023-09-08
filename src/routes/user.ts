@@ -7,6 +7,7 @@ import { validateUser } from "../schemas/user";
 
 import { verifyJwtToken } from "../middlewares/authJwt";
 import { getSHA256 } from "../utilities";
+import { number } from "zod";
 
 export const usersRouter = Router();
 
@@ -88,19 +89,47 @@ usersRouter.get("/me", verifyJwtToken, async (req, res) => {
 usersRouter.put("/:userId", verifyJwtToken, async (req, res) => {
   const { userId } = req.params;
 
-  if (req.body && req.body.oldPassword && req.body.newPassword) {
-    const { newPassword, oldPassword } = req.body;
+  if (
+    (req.body.oldPassword && req.body.newPassword) ||
+    (req.body.oldEmail && req.body.newEmail)
+  ) {
+    let affectedAuth: [] | number;
 
-    const [affectedUsers] = await AuthController.changeCredentials(
-      {
-        oldPassword: getSHA256(oldPassword),
-        newPassword: getSHA256(newPassword),
-      },
-      userId
-    );
+    if (req.body.oldPassword && req.body.newPassword) {
+      const { newPassword, oldPassword } = req.body;
 
-    affectedUsers
-      ? res.status(200).json({ message: "Modified credentials" })
-      : res.status(404).json({ message: "Not found" });
+      [affectedAuth] = await AuthController.changeCredentials(
+        {
+          oldPassword: getSHA256(oldPassword),
+          newPassword: getSHA256(newPassword),
+        },
+        userId
+      );
+    } else if (req.body.oldEmail && req.body.newEmail) {
+      const { oldEmail, newEmail } = req.body;
+
+      const [affectedUsers] = await UserController.changeEmail(
+        {
+          oldEmail,
+          newEmail,
+        },
+        userId
+      );
+
+      if (!affectedUsers)
+        return res.status(404).json({ error: "User Not found" });
+
+      [affectedAuth] = await AuthController.changeEmail(
+        {
+          oldEmail,
+          newEmail,
+        },
+        userId
+      );
+    }
+
+    affectedAuth
+      ? res.status(200).json({ message: "Modified successfully" })
+      : res.status(404).json({ error: "User Not found" });
   }
 });
