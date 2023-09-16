@@ -1,39 +1,30 @@
-import { Pet } from "../models";
+import { Pet, User } from "../models";
 import { index } from "../libs/algolia";
 
 export class PetController {
-  static async getNearbyPets(lat: string, lng: string) {
+  static async getNearbyPets(lat = -34.707175, lng = -58.518955) {
     try {
-      const { hits } = await index.search("", {
+      const res = await index.search("", {
         aroundLatLng: `${lat}, ${lng}`,
-        aroundRadius: 10000,
+        aroundRadius: 1000000000000000, // le llega la query pero no encuentra
       });
 
-      return hits;
+      console.log(res);
+
+      return res.hits;
     } catch (error) {
       console.error(error);
+      return -1;
     }
   }
 
-  static async getNearbyPetsWithIP() {
-    try {
-      const { hits } = await index.search("", {
-        aroundLatLngViaIP: true,
-        aroundRadius: 10000,
-      });
-      return hits;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  static async create(petData) {
+  static create(petData) {
     const { name, lat, lng } = petData;
 
     let pet;
 
     try {
-      pet = await Pet.create({
+      pet = Pet.create({
         ...petData,
       });
     } catch (error) {
@@ -50,21 +41,31 @@ export class PetController {
     //     },
     //   });
 
-    return pet.dataValues;
+    return pet;
     // } catch (error) {
     //   console.log(error);
     // }
   }
 
-  static async getAllPets() {
-    return Pet.findAll();
+  static getAll() {
+    return Pet.findAll({
+      include: [User],
+    });
   }
 
-  static async getById(id: number) {
-    return Pet.findByPk(id);
+  static getById(petId: string) {
+    return Pet.findByPk(petId, {
+      include: [User],
+    });
   }
 
-  static async getMyPets(userId: number) {
+  static updateById(id: string, data: {}) {
+    return Pet.update(data, {
+      where: { id },
+    });
+  }
+
+  static getMyPets(userId: string) {
     return Pet.findAll({
       where: { userId },
     });

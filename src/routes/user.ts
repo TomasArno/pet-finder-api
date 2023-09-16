@@ -6,8 +6,7 @@ import { UserController } from "../controllers/user";
 import { validateUser } from "../schemas/user";
 
 import { verifyJwtToken } from "../middlewares/authJwt";
-import { getSHA256 } from "../utilities";
-import { number } from "zod";
+import { utilities } from "../utilities";
 
 export const usersRouter = Router();
 
@@ -32,7 +31,7 @@ usersRouter.post("/signup", async (req, res) => {
   const userRecord = await UserController.newUser(email);
   const authRecord = await AuthController.newAuth({
     ...result.data,
-    password: getSHA256(password),
+    password: utilities.getSHA256(password),
     userRecord,
   });
 
@@ -61,7 +60,7 @@ usersRouter.post("/login", async (req, res) => {
 
   const authRecord = await AuthController.getAuth({
     ...result.data,
-    password: getSHA256(password),
+    password: utilities.getSHA256(password),
   });
 
   if (!authRecord)
@@ -83,7 +82,9 @@ usersRouter.get("/me", verifyJwtToken, async (req, res) => {
 
   if (!user) return res.status(400).json({ message: "User Not Found" });
 
-  res.status(200).json({ userId: user.dataValues.id });
+  res
+    .status(200)
+    .json({ userId: user.dataValues.id, email: user.dataValues.email });
 });
 
 usersRouter.put("/:userId", verifyJwtToken, async (req, res) => {
@@ -100,8 +101,8 @@ usersRouter.put("/:userId", verifyJwtToken, async (req, res) => {
 
       [affectedAuth] = await AuthController.changeCredentials(
         {
-          oldPassword: getSHA256(oldPassword),
-          newPassword: getSHA256(newPassword),
+          oldPassword: utilities.getSHA256(oldPassword),
+          newPassword: utilities.getSHA256(newPassword),
         },
         userId
       );
