@@ -22,14 +22,17 @@ export abstract class utilities {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   }
 
-  static createMsg(userEmail: string) {
+  static createMsg(
+    userEmail: string,
+    petData: { fullname; phoneNumber; description }
+  ) {
     return {
       to: `${userEmail}`,
       from: "arnotomas1@gmail.com",
       subject: "PET REPORT",
-      text: "and easy to do anywhere, even with Node.js",
-      templateId: "d-b080b499b6144d0ab6b1748fd3f05bc1",
-      html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+      text: `and easy to do anywhere, even with Node.js`,
+      // templateId: "d-b080b499b6144d0ab6b1748fd3f05bc1",
+      html: `REPORTE DE: ${petData.fullname},NUM TEL: ${petData.phoneNumber},DESCRIPCION: ${petData.description}`,
     };
   }
 }

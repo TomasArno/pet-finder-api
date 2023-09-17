@@ -34,6 +34,36 @@ petsRouter.post("/", verifyJwtToken, async (req, res) => {
   res.status(201).json(newPet.dataValues);
 });
 
+petsRouter.post("/:petId/report", async (req, res) => {
+  utilities.setApiKeySendgrid();
+
+  const { fullname, phoneNumber, description } = req.body;
+
+  const { petId } = req.params;
+
+  if (!petId || !fullname || !phoneNumber || !description)
+    return res.status(400).json({ message: "Missing data" });
+
+  const searchedPet = await PetController.getById(petId);
+
+  if (!searchedPet)
+    res.status(404).json({ message: "Searched pet doesn't exist" });
+
+  const petData = searchedPet.dataValues;
+  const userData = petData.user.dataValues;
+
+  const msg = utilities.createMsg(userData.email, req.body); // validar
+
+  sgMail
+    .send(msg)
+    .then(() => {
+      res.json("mensaje enviado");
+    })
+    .catch((error) => {
+      res.status(500).json(error);
+    });
+});
+
 petsRouter.get("/", async (req, res) => {
   res.status(200).json(await PetController.getAll());
 });
@@ -47,33 +77,6 @@ petsRouter.get("/:petId", verifyJwtToken, async (req, res) => {
     return res.status(400).json({ message: "Searched pet doesn't exist" });
 
   res.status(200).json(searchedPets);
-});
-
-petsRouter.get("/:petId/report", async (req, res) => {
-  utilities.setApiKeySendgrid();
-
-  const { petId } = req.params;
-
-  if (!petId) return res.status(404).json({ message: "missing petID" });
-
-  const searchedPet = await PetController.getById(petId);
-
-  if (!searchedPet)
-    res.status(404).json({ message: "Searched pet doesn't exist" });
-
-  const petData = searchedPet.dataValues;
-  const userData = petData.user.dataValues;
-
-  const msg = utilities.createMsg(userData.email);
-
-  sgMail
-    .send(msg)
-    .then(() => {
-      res.json("mensaje enviado");
-    })
-    .catch((error) => {
-      res.status(500).json(error);
-    });
 });
 
 petsRouter.get("/:lat/:lng", async (req, res) => {
