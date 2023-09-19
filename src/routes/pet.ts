@@ -1,5 +1,6 @@
 import { Router } from "express";
-import * as sgMail from "@sendgrid/mail";
+
+import { sgMail } from "../libs/sendgrid";
 
 import { PetController } from "../controllers/pet";
 
@@ -34,9 +35,7 @@ petsRouter.post("/", verifyJwtToken, async (req, res) => {
   res.status(201).json(newPet.dataValues);
 });
 
-petsRouter.post("/:petId/report", async (req, res) => {
-  utilities.setApiKeySendgrid();
-
+petsRouter.post("/:petId/report", verifyJwtToken, async (req, res) => {
   const { fullname, phoneNumber, description } = req.body;
 
   const { petId } = req.params;
@@ -64,7 +63,7 @@ petsRouter.post("/:petId/report", async (req, res) => {
     });
 });
 
-petsRouter.get("/", async (req, res) => {
+petsRouter.get("/", verifyJwtToken, async (req, res) => {
   res.status(200).json(await PetController.getAll());
 });
 
@@ -82,7 +81,7 @@ petsRouter.get("/:petId", verifyJwtToken, async (req, res) => {
 petsRouter.get("/:lat/:lng", async (req, res) => {
   const { lat, lng } = req.params;
 
-  const nearbyPets = await PetController.getNearbyPets();
+  const nearbyPets = await PetController.getNearbyPets(lat, lng);
 
   if (!nearbyPets) return res.status(400).json({ message: "No pets nearby" });
 
@@ -103,7 +102,7 @@ petsRouter.put("/:petId", verifyJwtToken, async (req, res) => {
   const [affectedPets] = await PetController.updateById(petId, result.data);
 
   if (affectedPets) {
-    res.status(200).json({ message: `Affected pets: ${affectedPets}` });
+    return res.status(200).json({ message: `Affected pets: ${affectedPets}` });
   } else {
     return res.status(400).json({ message: "PetId not exist" });
   }

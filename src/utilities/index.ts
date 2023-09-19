@@ -1,5 +1,4 @@
 import * as crypto from "crypto";
-import * as sgMail from "@sendgrid/mail";
 import { cloudinary } from "../libs/cloudinary";
 import { UploadApiResponse } from "cloudinary";
 
@@ -18,21 +17,15 @@ export abstract class utilities {
     }
   }
 
-  static setApiKeySendgrid() {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  }
-
   static createMsg(
     userEmail: string,
     petData: { fullname; phoneNumber; description }
   ) {
     return {
-      to: `${userEmail}`,
       from: "arnotomas1@gmail.com",
-      subject: "PET REPORT",
-      text: `and easy to do anywhere, even with Node.js`,
-      // templateId: "d-b080b499b6144d0ab6b1748fd3f05bc1",
-      html: `REPORTE DE: ${petData.fullname},NUM TEL: ${petData.phoneNumber},DESCRIPCION: ${petData.description}`,
+      to: `${userEmail}`,
+      subject: "TU MASCOTA HA SIDO VISTA",
+      html: `REPORTE DE: ${petData.fullname},\nNÚMERO TELEFÓNICO: ${petData.phoneNumber},\nDESCRIPCIÓN: ${petData.description}`,
     };
   }
 }
