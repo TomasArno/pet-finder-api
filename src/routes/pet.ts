@@ -78,7 +78,7 @@ petsRouter.get("/:userId", verifyJwtToken, async (req, res) => {
   res.status(200).json(searchedPets);
 });
 
-petsRouter.get("/:lat/:lng", async (req, res) => {
+petsRouter.get("/:lat/:lng", verifyJwtToken, async (req, res) => {
   const { lat, lng } = req.params;
   console.log(lat, lng);
 
