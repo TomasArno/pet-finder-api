@@ -1,18 +1,17 @@
 import { Pet, User } from "../models";
 import { index } from "../libs/algolia";
 
-export class PetController {
+export abstract class PetController {
   static async getNearbyPets(lat, lng) {
     try {
       const { hits } = await index.search("", {
         aroundLatLng: `${lat}, ${lng}`,
-        aroundRadius: 7000,
+        aroundRadius: 140000,
       });
 
       return hits;
     } catch (error) {
-      console.error(error);
-      return -1;
+      return error;
     }
   }
 
@@ -56,10 +55,23 @@ export class PetController {
     });
   }
 
-  static updateById(id: string, data: {}) {
-    return Pet.update(data, {
+  static async updateById(id: string, data: {}) {
+    const [affectedPets] = await Pet.update(data, {
       where: { id },
     });
+
+    if (affectedPets) {
+      const { objectID } = await index.partialUpdateObject(
+        { ...data, objectID: id },
+        {
+          createIfNotExists: false,
+        }
+      );
+
+      return objectID;
+    } else {
+      return 0;
+    }
   }
 
   static getMyPets(userId: string) {

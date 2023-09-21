@@ -13,7 +13,10 @@ import { utilities } from "../utilities";
 export const petsRouter = Router();
 
 petsRouter.post("/", verifyJwtToken, async (req, res) => {
-  // req.body.imgURL = (await submitImgCloudinary(req.body.imgURL)).secure_url;
+  req.body.imgURL = (
+    await utilities.submitImgCloudinary(req.body.imgURL)
+  ).secure_url;
+
   const result = validatePet(req.body);
 
   if (!result.success)
@@ -72,20 +75,24 @@ petsRouter.get("/:petId", verifyJwtToken, async (req, res) => {
 
   const searchedPets = await PetController.getMyPets(petId);
 
-  if (!searchedPets)
-    return res.status(400).json({ message: "Searched pet doesn't exist" });
+  if (!searchedPets) return res.status(404).json({ error: "PetId not found" });
 
   res.status(200).json(searchedPets);
 });
 
 petsRouter.get("/:lat/:lng", async (req, res) => {
   const { lat, lng } = req.params;
+  console.log(lat, lng);
 
   const nearbyPets = await PetController.getNearbyPets(lat, lng);
 
-  if (!nearbyPets) return res.status(400).json({ message: "No pets nearby" });
+  if (nearbyPets.status == 400) {
+    const { message } = nearbyPets;
 
-  res.status(200).json(nearbyPets);
+    return res.status(400).json({ error: message });
+  }
+
+  return res.status(200).json(nearbyPets);
 });
 
 petsRouter.put("/:petId", verifyJwtToken, async (req, res) => {
@@ -99,11 +106,13 @@ petsRouter.put("/:petId", verifyJwtToken, async (req, res) => {
       message: "All fields are required...",
     });
 
-  const [affectedPets] = await PetController.updateById(petId, result.data);
+  const affectedPetId = await PetController.updateById(petId, result.data);
 
-  if (affectedPets) {
-    return res.status(200).json({ message: `Affected pets: ${affectedPets}` });
+  if (affectedPetId) {
+    return res
+      .status(200)
+      .json({ message: `Affected pet id: ${affectedPetId}` });
   } else {
-    return res.status(400).json({ message: "PetId not exist" });
+    return res.status(404).json({ error: "PetId not found" });
   }
 });
