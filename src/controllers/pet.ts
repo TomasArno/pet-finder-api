@@ -74,6 +74,16 @@ export abstract class PetController {
     }
   }
 
+  static async deletebyId(userId: string, petId: string) {
+    const affectedPets = await Pet.destroy({
+      where: { userId, id: petId },
+    });
+
+    if (affectedPets) {
+      return await index.deleteObject(petId);
+    } else return null;
+  }
+
   static getMyPets(userId: string) {
     return Pet.findAll({
       where: { userId },

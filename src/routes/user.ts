@@ -71,12 +71,6 @@ usersRouter.post("/login", async (req, res) => {
   res.status(200).json({ token });
 });
 
-usersRouter.get("/test", verifyJwtToken, async (req, res) => {
-  res
-    .status(200)
-    .json([await UserController.getAll(), await AuthController.getAll()]);
-});
-
 usersRouter.get("/me", verifyJwtToken, async (req, res) => {
   const user = await UserController.getUserById(req["_user"].id);
 

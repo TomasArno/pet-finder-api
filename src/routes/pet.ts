@@ -25,8 +25,6 @@ petsRouter.post("/", verifyJwtToken, async (req, res) => {
       message: "All fields are required...",
     });
 
-  result.data.imgURL = "https://picsum.photos/200/300"; // MOCK
-
   const newPet = await PetController.create({
     ...result.data,
     userId: req["_user"].id,
@@ -70,12 +68,12 @@ petsRouter.get("/", verifyJwtToken, async (req, res) => {
   res.status(200).json(await PetController.getAll());
 });
 
-petsRouter.get("/:petId", verifyJwtToken, async (req, res) => {
-  const { petId } = req.params;
+petsRouter.get("/:userId", verifyJwtToken, async (req, res) => {
+  const { userId } = req.params;
 
-  const searchedPets = await PetController.getMyPets(petId);
+  const searchedPets = await PetController.getMyPets(userId);
 
-  if (!searchedPets) return res.status(404).json({ error: "PetId not found" });
+  if (!searchedPets) return res.status(404).json({ error: "userId not found" });
 
   res.status(200).json(searchedPets);
 });
@@ -115,4 +113,15 @@ petsRouter.put("/:petId", verifyJwtToken, async (req, res) => {
   } else {
     return res.status(404).json({ error: "PetId not found" });
   }
+});
+
+petsRouter.delete("/:petId", verifyJwtToken, async (req, res) => {
+  const { petId } = req.params;
+
+  const objectsDeleted = await PetController.deletebyId(req["_user"].id, petId);
+
+  if (!objectsDeleted)
+    return res.status(404).json({ error: "petId not found" });
+
+  return res.status(200).json({ message: objectsDeleted });
 });
